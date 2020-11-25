@@ -1,0 +1,41 @@
+Sub save_all_attachments()
+    'This macro will save all the attachments from the inbox of the specified mailbox
+    Dim Item As Object
+    Dim varOutput() As Variant
+    Dim lngcount As Long
+    Dim ShareInbox As Outlook.MAPIFolder
+    Dim olNs As Outlook.NameSpace
+    Dim olRecip As Outlook.Recipient
+    Dim SubFolder As Object
+    Dim DestFolder As String
+
+ 
+    Set olNs = Application.GetNamespace("MAPI")
+    'keep the schedules in inbox only
+    
+    'have the user pick a folder where the exports are located
+    If MsgBox("Select the folder that contains the exports", vbOKCancel, "MC_Reporting") = vbCancel Then Exit Sub
+    Set ShareInbox = olNs.PickFolder
+
+    
+    'Mailbox form which the attachments should be saved
+    Set olRecip = olNs.CreateRecipient("noresponse@cgi.com")
+    'Set ShareInbox = olNs.GetDefaultFolder(olFolderInbox)
+
+
+    'ReDim varOutput(1 To ShareInbox.Items.Count, 1 To 10)
+ 
+
+    'Location where the attachments will be saved
+    DestFolder = "C:\Users\"user"\mail_attch\"
+    For Each Item In ShareInbox.Items
+        If TypeName(Item) = "MailItem" Then
+            For Each Attch In Item.Attachments
+                FileName = DestFolder & Attch.FileName
+                Attch.SaveAsFile FileName
+            Next
+        End If
+    Next
+
+ 
+End Sub

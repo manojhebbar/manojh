@@ -1,0 +1,21 @@
+Private Sub Delete_Earlier_Data()
+    'This will add the exports downloaded and opened from the download attachments sub
+    Dim wbk As Workbook
+    Dim sht As String
+    Dim shtname As Variant
+
+
+    'turn off calculations to speed up formatting
+    'Application.Calculation = xlManual
+    shtname = Range("ReportsSAAS[Sheet Data Delete]")
+
+
+        For i = 1 To UBound(shtname) - (UBound(shtname) - 6)
+              
+            Sheets(shtname(i, 1)).Select
+            Rows("3:" & ActiveSheet.UsedRange.Rows.Count).Delete
+           ' Cells(4, 1).Value = "No Data Found"
+        Next i
+
+    MsgBox "Previous Data Deleted"
+End Sub

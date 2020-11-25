@@ -1,0 +1,82 @@
+Private Sub Unzip()
+    Dim FSO As Object
+    Dim oApp As Object
+    Dim Fname As Variant
+    Dim FileNameFolder As Variant
+    Dim DefPath As String
+    Dim strDate As String
+    Dim i As Long
+    Dim num As Long
+    Dim myname As String
+    Dim MyFolder As String
+    Dim MyFile As String
+    Dim TargetDate As Date
+    
+    
+    TargetDate = Now()
+
+   'Set a default path/folder when using Application.GetOpenFilename
+    
+    AttachmentPath = Application.ActiveWorkbook.Path
+    MyFolder = AttachmentPath & "\" & Format(TargetDate, "MM.DD.YYYY") & " ITSM_MAIN_Extracts\" 'Create a path for the exports
+      
+    
+    ChDir MyFolder
+    
+    MsgBox "Navigate to the Folder and Select all the zipped files", , "MC_Reporting"
+    'MsgBox "Zipfile should not start with '-' or any spl charecter, Correct the file name if any.", , "MC_Reporting"
+    
+    Fname = Application.GetOpenFilename(filefilter:="Zip Files (*.zip), *.zip", _
+                                        MultiSelect:=True)
+  
+                                        
+    If IsArray(Fname) = False Then
+        'Do nothing
+    Else
+        'Root folder for the new folder.
+        'You can also use DefPath = "C:\Users\Ron\test\"
+        TargetDate = Now()
+        AttachmentPath = Application.ActiveWorkbook.Path
+        NewFileName = AttachmentPath & "\" & Format(TargetDate, "MM.DD.YYYY") & " ITSM_MAIN_Extracts\" 'Create a path for the exports
+        
+        DefPath = NewFileName
+        If Right(DefPath, 1) <> "\" Then
+            DefPath = DefPath & "\"
+        End If
+
+        'Create the folder name
+        'strDate = Format(Now, " dd-mm-yy h-mm-ss")
+        FileNameFolder = DefPath
+
+        'Make the normal folder in DefPath
+        'MkDir FileNameFolder
+
+        'Extract the files into the newly created folder
+        Set oApp = CreateObject("Shell.Application")
+
+        For i = LBound(Fname) To UBound(Fname)
+            num = oApp.Namespace(FileNameFolder).Items.Count
+
+            oApp.Namespace(FileNameFolder).CopyHere oApp.Namespace(Fname(i)).Items '.Item(CStr(Fname(i)))
+           ' MsgBox Fname(i)
+            
+            myname = Fname(i)
+            MyFolder = DefPath
+            MyFile = Dir(MyFolder & "\*.xls")
+            MyOldFile = MyFolder & "\" & MyFile
+            ' Error msg  if file name dont contain (
+            mynewfile = MyFolder & "\" & Mid(myname, Len(MyFolder), (InStr(myname, "(")) - Len(MyFolder)) & ".xlsx"
+            ' Error msg  if selected folder has duplicate file.
+            
+            Name MyOldFile As mynewfile
+                Workbooks.Open (mynewfile) '& OLAtt.Filename)
+                ThisWorkbook.Activate
+        Next i
+
+       ' MsgBox "Spreadsheets extraced and are Open now.", , "MC_Reporting"
+        
+        On Error Resume Next
+        Set FSO = CreateObject("scripting.filesystemobject")
+        FSO.deletefolder Environ("Temp") & "\Temporary Directory*", True
+    End If
+End Sub

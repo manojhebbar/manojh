@@ -1,0 +1,91 @@
+Private Sub Download_ITSM_MAIN()
+'Downloads the most recent attachments, as indicated in the reports table
+Dim oOlAp As Object, oOlns As Object, OutLookInbox As Object
+Dim oOlItm As Object, OLAtt As Object
+
+Dim NewFileName, FolderName As String
+Dim TargetDate As Date
+Dim exportDL, TargetExportDL, EmailsFound As Integer
+Dim ReportsITSM As Variant
+                              
+
+
+'determine the reports to be downloaded
+
+ReportsITSM = Range("ReportsITSM[Email Subject Line]")
+
+'the target date is the date the email was sent on
+TargetDate = Now()
+
+'specifiy the folder to save the attachments to
+AttachmentPath = Application.ActiveWorkbook.Path
+NewFileName = AttachmentPath & "\" & Format(TargetDate, "MM.DD.YYYY") & " ITSM_MAIN_Extracts\" 'Create a path for the exports
+
+'create the folder for the exports
+On Error Resume Next
+MkDir (NewFileName)
+On Error GoTo 0
+
+'create outlook objects
+Set oOlAp = GetObject(, "Outlook.application")
+Set oOlns = oOlAp.GetNamespace("MAPI")
+
+'have the user pick a folder where the exports are located
+If MsgBox("Select the folder that contains the exports", vbOKCancel, "MC_Reporting") = vbCancel Then Exit Sub
+Set OutLookInbox = oOlns.PickFolder
+
+'return focus to excel
+AppActivate Application.Caption
+
+'sort emails newest to oldest
+Set EmailItem = OutLookInbox.Items
+EmailItem.Sort "[ReceivedTime]", True
+
+'Loop through all the emails in the specified folder and download any attachments that match the subject
+EmailsFound = 0
+LoopCheck = 200
+
+For EmailNum = 1 To EmailItem.Count
+    'check to see if the right folder was selected
+    If EmailNum = LoopCheck Then
+        If MsgBox(OutLookInbox.Items.Count - EmailNum & " Searched so far." & Chr(10) & "Continue Searching?", vbYesNo, "MC_Reporting") = vbNo Then
+            MsgBox ("Rerun report when ready."), , "MC_Reporting"
+            Exit Sub
+        Else
+           LoopCheck = LoopCheck + 200
+        End If
+    End If
+    'Loop through all the possible reports to see if the subject matches one in the list
+    For i = 1 To UBound(ReportsITSM)
+        If EmailItem(EmailNum).Subject Like ReportsITSM(i, 1) Then
+            For Each OLAtt In EmailItem(EmailNum).Attachments
+                OLAtt.SaveAsFile (NewFileName & OLAtt.Filename)
+                EmailItem(EmailNum).UnRead = False
+                
+            ' un Comment below line if its not zipped file    
+            '    Workbooks.Open (NewFileName & OLAtt.Filename)
+            '   ThisWorkbook.Activate
+            Next
+            ReportsITSM(i, 1) = "REPORT FOUND"
+            i = UBound(ReportsITSM)
+            EmailsFound = EmailsFound + 1
+            If EmailsFound = UBound(ReportsITSM) Then EmailNum = EmailItem.Count
+        End If
+    Next i
+Next
+
+'check to ensure all reports were found
+If EmailsFound = UBound(ReportsITSM) Then
+    Call Unzip
+    Call CompileReport_ITSM_MAIN
+   
+Else
+    MsgBox ("Not all reports found. Exiting"), , "MC_Reporting"
+End If
+
+Exit Sub
+PathError: _
+MsgBox ("Unable to create folder." & Chr(10) & Chr(10) & "Delete folder if it already exists."), , "MC_Reporting"
+
+    
+End Sub

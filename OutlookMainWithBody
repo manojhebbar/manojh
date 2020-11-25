@@ -1,0 +1,55 @@
+Sub AttachMail() 
+
+Set mailApp = CreateObject("Outlook.Application") Set mail = mailApp.CreateItem(olMailItem)
+
+MsgBox "Allow macro to access the e-mail address from outlook", , "EI s &  SLA Report"
+    
+mail.Display
+
+mail.To = Sheets("Lookups").Range("L10")
+mail.CC = Sheets("Lookups").Range("L11")
+mail.Subject = Sheets("Lookups").Range("L12")
+mail.Attachments.Add ActiveWorkbook.FullName
+
+Set wEditor = mailApp.ActiveInspector.WordEditor
+
+'copies the greatings
+Sheets("Lookups").Activate
+
+ActiveSheet.Range("K17:K25").Copy
+wEditor.Application.Selection.Paste
+
+wEditor.Application.Selection.TypeParagraph
+
+
+Sheets("SLA Summary").Activate
+
+ActiveSheet.Range("B2:K29").Copy
+wEditor.Application.Selection.Paste
+
+wEditor.Application.Selection.TypeParagraph
+    
+Sheets("SLA Summary").Activate
+
+'ActiveSheet.Range("B36:S46").Copy
+'wEditor.Application.Selection.Paste
+
+
+'copies the graphs
+
+ActiveSheet.ChartObjects("Chart 2").Activate
+ActiveChart.ChartArea.Copy
+wEditor.Application.Selection.PasteSpecial DataType:=4
+
+
+'ActiveSheet.ChartObjects("Chart 2").Activate
+'ActiveChart.ChartArea.Copy
+'wEditor.Application.Selection.PasteSpecial DataType:=4
+
+ 'wEditor.Application.Selection.TypeParagraph
+
+'Sheets("SLA Summary").Activate
+'ActiveSheet.ChartObjects("Chart 6").Activate
+'ActiveChart.ChartArea.Copy
+'wEditor.Application.Selection.PasteSpecial DataType:=4
+End Sub

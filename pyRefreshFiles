@@ -1,0 +1,29 @@
+import os
+import glob
+import time
+import pandas as pd
+import win32com.client as win32
+
+##Provide the path of the folder where all the files have to be read
+##if its in C:\Downloads, path must be as below
+## '*' represents all the files in that path
+
+path1 = 'C:/Users/manoj.gogate/Desktop/SNCL-Daily-Monthly/Sector Reports/*xls*'
+path = 'C:/Users/manoj.gogate/Desktop/SNCL-Daily-Monthly/Daily SLA Reports/*xls*'
+
+##iterate through the files
+for i in glob.glob(path):
+    Xlsx = win32.DispatchEx('Excel.Application')
+   # Xlsx = read_excel(i)
+    Xlsx.DisplayAlerts = False
+    Xlsx.Visible = True
+    print(i)
+    book = Xlsx.Workbooks.Open(i)
+    # Refresh my two sheets
+    book.RefreshAll()
+    time.sleep(30) # Sleep for 3 seconds
+    book.Save()
+    book.Close()
+    Xlsx.Quit()
+    del book
+    del Xlsx

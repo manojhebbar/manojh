@@ -1,0 +1,73 @@
+# manojh
+Scripts
+
+
+Sub PrepareDeck()
+    Dim prs As Presentation
+    Dim newPowerPoint As PowerPoint.Application
+    Dim activeSlide As PowerPoint.Slide
+    Dim shp As Object
+    Dim cht As Excel.ChartObject
+    Dim pwp As Object
+    Dim lCurrSlide As Long
+    Dim filename As String
+    
+        
+    AttachmentPath = Application.ActiveWorkbook.Path
+    
+    filename = Sheet12.Range("D6").Value & Sheet12.Range("D8").Value
+         'Look for existing instance
+
+       ' Set pwp = CreateObject("PowerPoint.Application")
+       ' pwp.Visible = True
+        ' pwp.Presentations.Open Filename:="D:\Test_Report.pptx"
+
+        If newPowerPoint Is Nothing Then
+            'Set newPowerPoint = New PowerPoint.Application
+            Set newPowerPoint = CreateObject("PowerPoint.Application")
+                newPowerPoint.Visible = True
+        End If
+        
+        newPowerPoint.ActiveWindow.View.GotoSlide (1)
+        Set activeSlide = newPowerPoint.ActivePresentation.Slides(1)
+        Sheet12.Range("D9").Copy
+        'ActiveChart.ChartArea.Copy ppPasteText
+        
+        activeSlide.Shapes.PasteSpecial(DataType:=ppPasteHTML).Select
+        newPowerPoint.ActiveWindow.Selection.ShapeRange.Left = 60
+        newPowerPoint.ActiveWindow.Selection.ShapeRange.Top = 370
+       
+        'Application.ActivePresentation.FileDialog(msoFileDialogSaveAs).Show
+
+        'newPowerPoint.ActiveWindow.View.GotoSlide n
+        newPowerPoint.ActiveWindow.View.GotoSlide (6)
+        Set activeSlide = newPowerPoint.ActivePresentation.Slides(6)
+        '(newPowerPoint.ActivePresentation.Slides.Count)
+
+        Sheet11.ChartObjects("Chart 2").Activate
+        ActiveChart.ChartArea.Copy
+        activeSlide.Shapes.PasteSpecial(DataType:=ppPasteMetafilePicture).Select
+        newPowerPoint.ActiveWindow.Selection.ShapeRange.Left = 45
+        newPowerPoint.ActiveWindow.Selection.ShapeRange.Top = 90
+        newPowerPoint.ActiveWindow.Selection.ShapeRange.Height = 400
+        
+        
+        newPowerPoint.ActivePresentation.SaveAs filename:=AttachmentPath & "\" & filename & ".pptx"
+       
+  
+   
+    MsgBox "PPT completed", , "MC Reporting"
+        
+
+'PPApp.FileDialog(msoFileDialogSaveAs).Show
+
+'AppActivate ("Microsoft PowerPoint")
+Set activeSlide = Nothing
+Set newPowerPoint = Nothing
+
+
+
+
+End Sub
+
+
